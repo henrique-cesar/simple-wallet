@@ -1,0 +1,119 @@
+version: '3.6'
+
+services:
+  mysql:
+    image: mysql:8.0.36
+    container_name: mysql
+    ports:
+      - "3333:3306"
+    volumes:
+      - ./local/database/schema.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./local/database/data.sql:/docker-entrypoint-initdb.d/2.sql
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: simple_wallet
+      MYSQL_USER: local
+      MYSQL_PASSWORD: local
+
+  wiremock:
+    container_name: wiremock
+    hostname: wiremock
+    image: wiremock/wiremock
+    network_mode: bridge
+    ports:
+      - "8200:8080"
+    volumes:
+      - ./local/wiremock/:/home/wiremock
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.4.3
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: '2181'
+      ZOOKEEPER_ADMIN_ENABLE_SERVER: 'false'
+
+  kafka:
+    image: confluentinc/cp-kafka:5.4.3
+    container_name: kafka
+    hostname: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: '1'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_NUM_PARTITIONS: '12'
+      KAFKA_COMPRESSION_TYPE: 'gzip'
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: '1'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_AUTHORIZER_CLASS_NAME: 'kafka.security.auth.SimpleAclAuthorizer'
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: 'true'
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.4.3
+    container_name: schema-registry
+    hostname: schema-registry
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "8085:8085"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:9092'
+      SCHEMA_REGISTRY_HOST_NAME: 'schema-registry'
+      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8085'
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: 'INFO'
+
+  akhq:
+    image: tchiotludo/akhq:0.17.0
+    container_name: akhq
+    depends_on:
+      - zookeeper
+      - kafka
+      - schema-registry
+    ports:
+      - "8001:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka:
+              properties:
+                bootstrap.servers: "kafka:9092"
+              schema-registry:
+                url: "http://schema-registry:8085"
+
+  kafka-topics:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - zookeeper
+      - kafka
+      - schema-registry
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./local/kafka/topics.kafka:/app/topics.kafka:ro
+      - ./local/kafka/kafka-client.properties:/app/kafka-client.properties:ro
+    restart: on-failure
+    command:
+      - sh
+      - -c
+      - |
+        IFS=$$'\n'
+        set -f
+        sleep 20
+        for TOPIC in $$(cat < "/app/topics.kafka"); do
+          echo "Criando topico: $${TOPIC}"
+          kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --replication-factor 1 --partitions 1 --topic $$(echo $$TOPIC | tr -d '\n\r') --command-config /app/kafka-client.properties
+        done

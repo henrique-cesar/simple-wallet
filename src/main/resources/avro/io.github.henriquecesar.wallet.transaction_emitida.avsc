@@ -1,0 +1,18 @@
+{
+    "namespace": "io.github.henriquecesar.wallet.transaction_emitida",
+    "type": "record",
+    "name": "TransactionEmitida",
+    "fields": [
+        { "name": "numero_identificador_transacao", "type": "string" },
+        { "name": "numero_identificador_conta", "type": "string" },
+        { "name": "valor", "type": "string" },
+        { "name": "descricao", "type": ["null", "string"], "default": null },
+        { "name": "informacoes_complementares", "type": { "type": "array", "items": { "type": "record",
+            "name": "InformacoesComplementares",
+            "fields": [
+                { "name": "chave", "type": "string" },
+                { "name": "valor", "type": "string" }
+            ]}}
+        }
+    ]
+}

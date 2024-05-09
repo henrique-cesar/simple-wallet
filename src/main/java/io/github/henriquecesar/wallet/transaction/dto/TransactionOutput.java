@@ -1,4 +1,4 @@
-package io.github.henriquecesar.wallet.account.dto;
+package io.github.henriquecesar.wallet.transaction.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

@@ -2,13 +2,13 @@ package io.github.henriquecesar.wallet.account.controller;
 
 import br.com.fluentvalidator.context.ValidationResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.henriquecesar.wallet.account.dto.ExtractOutput;
-import io.github.henriquecesar.wallet.account.dto.TransactionInput;
-import io.github.henriquecesar.wallet.account.validator.TransactionInputValidator;
+import io.github.henriquecesar.wallet.balance.validator.TransactionInputValidator;
 import io.github.henriquecesar.wallet.core.constants.ApplicationConstants;
-import io.github.henriquecesar.wallet.core.service.AccountService;
 import io.github.henriquecesar.wallet.core.service.AuthorizationService;
+import io.github.henriquecesar.wallet.core.service.ExtractService;
 import io.github.henriquecesar.wallet.domain.*;
+import io.github.henriquecesar.wallet.extract.dto.ExtractOutput;
+import io.github.henriquecesar.wallet.transaction.dto.TransactionInput;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,7 +45,7 @@ class GetExtractControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AccountService accountService;
+    private ExtractService extractService;
 
     @MockBean
     private TransactionInputValidator inputValidator;
@@ -62,7 +65,7 @@ class GetExtractControllerTest {
         String balanceId = UUID.randomUUID().toString();
         Extract extract = mockExtract(accountId, balanceId, TransactionType.RECARGA);
 
-        Mockito.when(accountService.getExtract(accountId, balanceId)).thenReturn(extract);
+        Mockito.when(extractService.getBy(accountId, balanceId, 0)).thenReturn(extract);
         Mockito.when(inputValidator.validate(any(TransactionInput.class))).thenReturn(ValidationResult.ok());
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
@@ -76,8 +79,8 @@ class GetExtractControllerTest {
         assertNotNull(output);
         assertEquals(extract.getBalance().getAccount().getId(), output.getAccountId());
         assertEquals(extract.getBalance().getTotal(), output.getTotalBalance());
-        assertEquals(extract.getTransactions().get(0).getId(), output.getTransactions().get(0).getId());
-        assertEquals(extract.getTransactions().get(0).getType().getValue(), output.getTransactions().get(0).getType().getValue());
+        assertEquals(extract.getTransactions().getContent().get(0).getId(), output.getItems().getTransactions().get(0).getId());
+        assertEquals(extract.getTransactions().getContent().get(0).getType().getValue(), output.getItems().getTransactions().get(0).getType().getValue());
     }
 
     @SneakyThrows
@@ -89,7 +92,7 @@ class GetExtractControllerTest {
         String balanceId = UUID.randomUUID().toString();
         Extract extract = mockExtract(accountId, balanceId, transactionType);
 
-        Mockito.when(accountService.getExtract(accountId, balanceId, transactionType)).thenReturn(extract);
+        Mockito.when(extractService.getBy(accountId, balanceId, transactionType, 0)).thenReturn(extract);
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
                 .get(URI_GET_EXTRACT.concat("?type={transactionType}"), accountId, balanceId, transactionType.getValue())
@@ -102,8 +105,8 @@ class GetExtractControllerTest {
         assertNotNull(output);
         assertEquals(extract.getBalance().getAccount().getId(), output.getAccountId());
         assertEquals(extract.getBalance().getTotal(), output.getTotalBalance());
-        assertEquals(extract.getTransactions().get(0).getId(), output.getTransactions().get(0).getId());
-        assertEquals(extract.getTransactions().get(0).getType().getValue(), output.getTransactions().get(0).getType().getValue());
+        assertEquals(extract.getTransactions().getContent().get(0).getId(), output.getItems().getTransactions().get(0).getId());
+        assertEquals(extract.getTransactions().getContent().get(0).getType().getValue(), output.getItems().getTransactions().get(0).getType().getValue());
     }
 
     private Extract mockExtract(String accountId, String balanceId, TransactionType transactionType) {
@@ -112,7 +115,7 @@ class GetExtractControllerTest {
 
         Transaction transaction = mockTransaction(transactionType, new BigDecimal("1.99"));
 
-        return new Extract(balance, List.of(transaction));
+        return new Extract(balance, new PageImpl<>(List.of(transaction), Pageable.ofSize(10), 1));
     }
 
     private Transaction mockTransaction(TransactionType transactionType, BigDecimal value) {

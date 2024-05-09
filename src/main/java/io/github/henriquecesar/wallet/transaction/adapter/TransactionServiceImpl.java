@@ -1,25 +1,21 @@
 package io.github.henriquecesar.wallet.transaction.adapter;
 
-import io.github.henriquecesar.wallet.core.exception.TransactionException;
+import io.github.henriquecesar.wallet.core.exception.BusinessException;
 import io.github.henriquecesar.wallet.core.persistence.BalancePersistence;
 import io.github.henriquecesar.wallet.core.persistence.TransactionPersistence;
 import io.github.henriquecesar.wallet.core.service.TransactionService;
 import io.github.henriquecesar.wallet.domain.Transaction;
-import io.github.henriquecesar.wallet.domain.TransactionType;
 import io.github.henriquecesar.wallet.persistence.model.BalanceEntity;
 import io.github.henriquecesar.wallet.persistence.model.TransactionEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-
-    public TransactionServiceImpl(BalancePersistence balancePersistence, TransactionPersistence transactionPersistence) {
-        this.balancePersistence = balancePersistence;
-        this.transactionPersistence = transactionPersistence;
-    }
 
     private final BalancePersistence balancePersistence;
     private final TransactionPersistence transactionPersistence;
@@ -29,7 +25,7 @@ public class TransactionServiceImpl implements TransactionService {
         BalanceEntity balance = balancePersistence.findById(transaction.getBalanceId());
 
         if (balance.isLocked()) {
-            throw new TransactionException("Balanço possui restrições.");
+            throw new BusinessException("Balanço possui restrições.");
         }
 
         if (transaction.isDebitOperation()) {
@@ -37,7 +33,7 @@ public class TransactionServiceImpl implements TransactionService {
             BigDecimal newBalance = amountBalance.subtract(transaction.getValue());
 
             if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-                throw new TransactionException("Saldo insuficiente.");
+                throw new BusinessException("Saldo insuficiente.");
             }
         }
     }
@@ -45,24 +41,26 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void realize(Transaction transaction) {
-        if (transactionPersistence.findById(transaction.getId()) != null) {
-            throw new TransactionException("Essa transação já existe.");
-        }
+        if (transaction == null) return;
 
         if (!transaction.isCreditOperation() && !transaction.isDebitOperation())
-            throw new TransactionException("Operação não permitida.");
+            throw new BusinessException("Operação não permitida.");
 
-        if (transaction.getValue().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransactionException("O valor de transação é inválido.");
+        if (transaction.getValue() == null || transaction.getValue().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("O valor de transação é inválido.");
+        }
+
+        if (transactionPersistence.findById(transaction.getId()) != null) {
+            throw new BusinessException("Essa transação já existe.");
         }
 
         BalanceEntity balanceEntity = balancePersistence.findById(transaction.getBalanceId());
 
         if (balanceEntity == null)
-            throw new TransactionException("Balanço não encontrado.");
+            throw new BusinessException("Balanço não encontrado.");
 
         if (balanceEntity.isLocked())
-            throw new TransactionException("Balanço com restrições.");
+            throw new BusinessException("Balanço com restrições.");
 
 
         BigDecimal transactionValue = transaction.getValue();
@@ -72,7 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
             amount = balanceEntity.getAmount().subtract(transactionValue);
 
             if (amount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new TransactionException("Saldo insuficiente.");
+                throw new BusinessException("Saldo insuficiente.");
             }
 
         } else {
@@ -85,11 +83,5 @@ public class TransactionServiceImpl implements TransactionService {
 
         transactionPersistence.save(transactionEntity);
     }
-
-    @Override
-    public void list(String balanceId, TransactionType transactionType) {
-        transactionPersistence.findByBalanceIdAndType(balanceId, transactionType);
-    }
-
 
 }

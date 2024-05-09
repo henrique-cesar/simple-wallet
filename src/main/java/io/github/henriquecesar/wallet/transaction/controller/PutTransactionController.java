@@ -1,11 +1,11 @@
 package io.github.henriquecesar.wallet.transaction.controller;
 
-import io.github.henriquecesar.wallet.account.dto.TransactionInput;
-import io.github.henriquecesar.wallet.account.validator.TransactionInputValidator;
+import io.github.henriquecesar.wallet.transaction.dto.TransactionInput;
+import io.github.henriquecesar.wallet.balance.validator.TransactionInputValidator;
 import io.github.henriquecesar.wallet.domain.CanalOrigem;
 import io.github.henriquecesar.wallet.core.UserInfo;
 import io.github.henriquecesar.wallet.core.command.CommandContext;
-import io.github.henriquecesar.wallet.core.command.CommandProcessorTransactionHandler;
+import io.github.henriquecesar.wallet.core.command.transaction.CommandProcessorTransactionHandler;
 import io.github.henriquecesar.wallet.core.exception.BadRequestException;
 import io.github.henriquecesar.wallet.core.service.AuthorizationService;
 import io.github.henriquecesar.wallet.service.auth.aspect.NeedsAuthorization;

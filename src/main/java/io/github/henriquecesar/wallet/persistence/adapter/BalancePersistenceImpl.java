@@ -23,7 +23,7 @@ public class BalancePersistenceImpl implements BalancePersistence {
 
     @Override
     public BalanceEntity findByIdAndAccountId(String id, String accountId) {
-        String jpql = "SELECT b FROM BalanceEntity b WHERE b.id = :id AND b.accountId = :accountId";
+        String jpql = "SELECT b FROM balance b WHERE b.id = :id AND b.account.id = :accountId";
         TypedQuery<BalanceEntity> query = entityManager.createQuery(jpql, BalanceEntity.class);
         query.setParameter("id", id);
         query.setParameter("accountId", accountId);

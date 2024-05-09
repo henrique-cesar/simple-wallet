@@ -3,8 +3,7 @@ package io.github.henriquecesar.wallet.domain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Getter
 @Setter
@@ -13,6 +12,6 @@ public class Extract {
 
     private Balance balance;
 
-    private List<Transaction> transactions;
+    private Page<Transaction> transactions;
 
 }

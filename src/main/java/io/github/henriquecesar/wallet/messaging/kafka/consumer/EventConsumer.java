@@ -18,7 +18,7 @@ public class EventConsumer {
 
     public <T extends GenericRecord> void consume(final T recordValue, final MessageHeaders messageHeaders, final String toggle, final Consumer<T> consumer) {
 
-        if (toggle != null && environment.getProperty(toggle, Boolean.class, Boolean.TRUE)) {
+        if (toggle != null && !environment.getProperty(toggle, Boolean.class, Boolean.FALSE)) {
             // Log evento desabilitado
             return;
         }

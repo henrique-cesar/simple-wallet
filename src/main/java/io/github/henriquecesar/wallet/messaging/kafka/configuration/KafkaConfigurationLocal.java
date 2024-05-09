@@ -3,13 +3,16 @@ package io.github.henriquecesar.wallet.messaging.kafka.configuration;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
+@EnableKafka
 @Configuration
 public class KafkaConfigurationLocal {
 
@@ -32,7 +35,7 @@ public class KafkaConfigurationLocal {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, GenericRecord>> kafkaListenerContainerFactory(final ConsumerFactory<String, GenericRecord> consumerFactory) {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, GenericRecord>> containerFactory(final ConsumerFactory<String, GenericRecord> consumerFactory) {
         ConsumerRecordFilterStrategy consumerRecordFilterStrategy = new ConsumerRecordFilterStrategy();
         consumerRecordFilterStrategy.setTransactionConsumerDisabled(!featureToggleTransactionConsumer);
 

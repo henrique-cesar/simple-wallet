@@ -1,10 +1,9 @@
-package io.github.henriquecesar.wallet.account.validator;
+package io.github.henriquecesar.wallet.balance.validator;
 
 import br.com.fluentvalidator.AbstractValidator;
-import io.github.henriquecesar.wallet.account.dto.TransactionInput;
+import io.github.henriquecesar.wallet.transaction.dto.TransactionInput;
 import io.github.henriquecesar.wallet.core.constants.ApplicationConstants;
 import io.github.henriquecesar.wallet.domain.TransactionType;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

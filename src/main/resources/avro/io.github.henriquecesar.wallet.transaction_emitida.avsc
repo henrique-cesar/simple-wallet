@@ -5,7 +5,9 @@
     "fields": [
         { "name": "numero_identificador_transacao", "type": "string" },
         { "name": "numero_identificador_conta", "type": "string" },
+        { "name": "numero_identificador_balanco", "type": "string" },
         { "name": "valor", "type": "string" },
+        { "name": "tipo_transacao", "type": "string" },
         { "name": "descricao", "type": ["null", "string"], "default": null },
         { "name": "informacoes_complementares", "type": { "type": "array", "items": { "type": "record",
             "name": "InformacoesComplementares",

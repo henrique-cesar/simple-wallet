@@ -1,12 +1,13 @@
-package io.github.henriquecesar.wallet.account.controller.contract;
+package io.github.henriquecesar.wallet.core.controller;
 
-import io.github.henriquecesar.wallet.account.dto.BalanceOutput;
+import io.github.henriquecesar.wallet.balance.dto.BalanceOutput;
 import io.github.henriquecesar.wallet.core.UserInfo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import springfox.documentation.annotations.ApiIgnore;
 
 public interface GetBalanceControllerContract {
 
@@ -15,7 +16,7 @@ public interface GetBalanceControllerContract {
     ResponseEntity<BalanceOutput> getAmount(
             @ApiParam(value = "Account ID", required = true) @PathVariable String accountId,
             @ApiParam(value = "Balance ID", required = true) @PathVariable String balanceId,
-            @ApiParam(hidden = true) UserInfo userInfo);
+            @ApiIgnore UserInfo userInfo);
 
 }
 

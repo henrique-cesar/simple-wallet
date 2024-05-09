@@ -1,7 +1,7 @@
 package io.github.henriquecesar.wallet.transaction.adapter.steps;
 
 import io.github.henriquecesar.wallet.core.command.CommandContext;
-import io.github.henriquecesar.wallet.core.command.TransactionStep;
+import io.github.henriquecesar.wallet.core.command.transaction.TransactionStep;
 import io.github.henriquecesar.wallet.core.processor.ExecuteTransactionCommandProcessor;
 import io.github.henriquecesar.wallet.core.service.TransactionService;
 import io.github.henriquecesar.wallet.domain.CanalOrigem;

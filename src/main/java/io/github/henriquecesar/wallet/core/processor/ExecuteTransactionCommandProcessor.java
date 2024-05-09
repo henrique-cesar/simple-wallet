@@ -1,7 +1,6 @@
 package io.github.henriquecesar.wallet.core.processor;
 
-import io.github.henriquecesar.wallet.core.command.CommandProcessorTransactionStep;
-import io.github.henriquecesar.wallet.domain.Transaction;
+import io.github.henriquecesar.wallet.core.command.transaction.CommandProcessorTransactionStep;
 
 public interface ExecuteTransactionCommandProcessor extends CommandProcessorTransactionStep {
 }

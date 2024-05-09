@@ -9,6 +9,5 @@ public interface TransactionService {
 
     void realize(Transaction transaction);
 
-    void list(String balanceId, TransactionType transactionType);
 
 }

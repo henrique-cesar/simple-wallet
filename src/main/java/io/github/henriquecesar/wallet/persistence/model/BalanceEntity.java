@@ -35,8 +35,8 @@ public class BalanceEntity {
     public Balance fromModel() {
         Balance balance = new Balance();
         balance.setId(this.id);
-        balance.setAccount(this.account.fromModel());
-        balance.setTotal(this.amount.setScale(ApplicationConstants.SCALE_MONEY, RoundingMode.DOWN));
+        balance.setAccount(this.account == null ? null : this.account.fromModel());
+        balance.setTotal(this.amount == null ? null : this.amount.setScale(ApplicationConstants.SCALE_MONEY, RoundingMode.DOWN));
         balance.setLocked(this.locked);
 
         return balance;

@@ -1,10 +1,10 @@
 package io.github.henriquecesar.wallet.core.exception;
 
-public class TransactionException extends RuntimeException {
+public class BusinessException extends RuntimeException {
 
     private final String message;
 
-    public TransactionException(String message) {
+    public BusinessException(String message) {
         this.message = message;
     }
 

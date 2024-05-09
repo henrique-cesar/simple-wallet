@@ -1,13 +1,16 @@
-package io.github.henriquecesar.wallet.account.dto;
+package io.github.henriquecesar.wallet.extract.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.github.henriquecesar.wallet.transaction.dto.TransactionOutput;
 import io.github.henriquecesar.wallet.core.constants.ApplicationConstants;
 import io.github.henriquecesar.wallet.domain.Account;
 import io.github.henriquecesar.wallet.domain.Balance;
 import io.github.henriquecesar.wallet.domain.Extract;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,9 +23,9 @@ import java.util.stream.Collectors;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ExtractOutput {
 
-    String accountId;
-    BigDecimal totalBalance;
-    List<TransactionOutput> transactions;
+    private String accountId;
+    private BigDecimal totalBalance;
+    private ExtractTransactionList items;
 
     public ExtractOutput(Extract extract) {
         if (extract == null) return;
@@ -37,9 +40,7 @@ public class ExtractOutput {
                 .map(b -> b.setScale(ApplicationConstants.SCALE_MONEY, RoundingMode.DOWN))
                 .orElse(null);
 
-        this.transactions = extract.getTransactions()
-                .stream().map(TransactionOutput::new)
-                .collect(Collectors.toList());
+        this.items = new ExtractTransactionList(extract.getTransactions() == null ? null : extract.getTransactions().map(TransactionOutput::new));
     }
 
 }

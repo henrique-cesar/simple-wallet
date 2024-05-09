@@ -1,5 +1,6 @@
-package io.github.henriquecesar.wallet.core.command;
+package io.github.henriquecesar.wallet.core.command.transaction;
 
+import io.github.henriquecesar.wallet.core.command.CommandContext;
 import io.github.henriquecesar.wallet.domain.CanalOrigem;
 import org.springframework.stereotype.Service;
 

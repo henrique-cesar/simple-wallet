@@ -1,8 +1,8 @@
 package io.github.henriquecesar.wallet.account.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.henriquecesar.wallet.account.dto.BalanceOutput;
-import io.github.henriquecesar.wallet.core.service.AccountService;
+import io.github.henriquecesar.wallet.balance.dto.BalanceOutput;
+import io.github.henriquecesar.wallet.core.service.BalanceService;
 import io.github.henriquecesar.wallet.core.service.AuthorizationService;
 import io.github.henriquecesar.wallet.domain.Account;
 import io.github.henriquecesar.wallet.domain.Balance;
@@ -34,7 +34,7 @@ class GetBalanceControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AccountService accountService;
+    private BalanceService accountService;
 
     @MockBean
     private AuthorizationService authorizationService;
@@ -51,7 +51,7 @@ class GetBalanceControllerTest {
         String balanceId = UUID.randomUUID().toString();
         Balance balance = mockBalance(accountId, balanceId, new BigDecimal("5.00"));
 
-        Mockito.when(accountService.getBalanceAmount(accountId, balanceId)).thenReturn(balance);
+        Mockito.when(accountService.getBy(accountId, balanceId)).thenReturn(balance);
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
                 .get(URI_GET_BALANCE, accountId, balanceId)
